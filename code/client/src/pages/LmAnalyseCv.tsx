@@ -27,7 +27,7 @@ const AXES: { cle: CleAxe; libelle: string }[] = [
 const DEMO = {
   scoreGlobal: 68,
   axes: { completude: 74, ats: 55, qualite: 61, structure: 78 } as Record<CleAxe, number>,
-  salaire: { bas: 45, haut: 58, nbOffres: 214 },
+  offres: 34,
   actions: [
     "Remplacez « Participation au déploiement » par « Déployé l'outil sur 3 sites, 120 utilisateurs formés ».",
     "Chiffrez vos 3 derniers postes : budget, taille d'équipe, résultat obtenu.",
@@ -190,28 +190,21 @@ function Radar({ valeurs, taille = 190 }: { valeurs: Record<CleAxe, number>; tai
   );
 }
 
-/** Bloc sombre « fourchette de salaire ». */
-function BlocSalaire({
-  salaire,
-  visible,
-}: {
-  salaire: { bas: number; haut: number; nbOffres: number };
-  visible: boolean;
-}) {
+/**
+ * Bloc sombre « offres correspondantes ».
+ *
+ * C'est la promesse de fin de parcours, montrée dès l'aperçu : l'analyse ne
+ * s'arrête pas à un diagnostic, elle débouche sur des postes réels.
+ */
+function BlocOffres({ nb, visible }: { nb: number; visible: boolean }) {
   return (
     <div className={`rounded-xl bg-foreground p-3 ${classeApparition(visible)}`}>
-      <p className="mb-0.5 text-[10px] uppercase tracking-wide text-background/50">
-        Fourchette de salaire
-      </p>
+      <p className="mb-0.5 text-[10px] uppercase tracking-wide text-background/50">Offres correspondantes</p>
       <p className="text-2xl font-bold tabular-nums text-primary">
-        {salaire.bas}
-        <span className="mx-1 text-base text-background/50">à</span>
-        {salaire.haut}
-        <span className="ml-0.5 text-lg text-background/70">k€</span>
+        {nb}
+        <span className="ml-1.5 text-base font-semibold text-background/70">offres d'emploi</span>
       </p>
-      <p className="text-[10px] text-background/50">
-        brut annuel · sur {salaire.nbOffres} offres collectées
-      </p>
+      <p className="text-[10px] text-background/50">trouvées pour votre profil</p>
     </div>
   );
 }
@@ -270,17 +263,17 @@ export default function LmAnalyseCv() {
   }, [fichier, email, emailValide, consentCv, consentInfos, naviguer]);
 
   const valeursAxes: Record<CleAxe, number> = DEMO.axes;
-  const salaire = DEMO.salaire;
+  const offres = DEMO.offres;
   const puces = DEMO.actions;
 
-  // Cascade : label du score, salaire, titre du plan, puis chaque puce.
+  // Cascade : label du score, offres, titre du plan, puis chaque puce.
   const reveles = useCascade(3 + puces.length);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-card to-background text-foreground">
       <SEO
-        title="Ce que votre CV vaut — analyse gratuite | Rebond"
-        description="Score sur 5 critères, fourchette de salaire, incohérences et plan d'action. 90 secondes, gratuit, sans inscription."
+        title="Votre CV est-il au niveau pour trouver un emploi en 2026 ? | Rebond"
+        description="En 30 secondes, notre agent analyse votre CV, vous explique point par point ce qu'il faut corriger et vous permet de trouver des offres d'emploi adaptées à votre expérience."
       />
 
       <header className="mx-auto flex max-w-[1400px] items-center justify-between px-5 pt-5">
@@ -299,13 +292,12 @@ export default function LmAnalyseCv() {
       <main className="mx-auto max-w-[1400px] px-5 pb-16 pt-8">
         <div className="mb-8 text-center">
           <h1 className="text-xl font-bold leading-tight text-balance md:text-4xl">
-            Ce que votre CV vaut
-            <br />
-            <span className="text-primary">avant qu'un recruteur l'ouvre.</span>
+            Votre CV est-il au niveau pour{" "}
+            <span className="text-primary">trouver un emploi en 2026 ?</span>
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground md:text-base">
-            Score sur 5 critères, fourchette de salaire, axes à corriger.{" "}
-            <span className="font-bold text-primary">90 secondes, gratuit.</span>
+          <p className="mx-auto mt-3 max-w-[720px] text-sm text-muted-foreground text-balance md:text-base">
+            En 30 secondes, notre agent analyse votre CV, vous explique point par point ce qu'il faut corriger et
+            vous permet de trouver des offres d'emploi adaptées à votre expérience.
           </p>
         </div>
 
@@ -470,13 +462,7 @@ export default function LmAnalyseCv() {
               </div>
             </div>
 
-            {salaire ? (
-              <BlocSalaire salaire={salaire} visible={reveles >= 2} />
-            ) : (
-              <div className={`rounded-xl bg-muted p-3 text-xs text-muted-foreground ${classeApparition(reveles >= 2)}`}>
-                Pas assez d'offres collectées sur ce métier pour donner une fourchette fiable.
-              </div>
-            )}
+            <BlocOffres nb={offres} visible={reveles >= 2} />
 
             {/* Plan d'action */}
             <div className="mt-3">
